@@ -1,29 +1,59 @@
-import { useState } from 'react';
-import { getVoiceSettings, saveVoiceSettings, speak, speechSupported } from '../lib/speech.js';
+import { useEffect, useState } from 'react';
+import {
+  getVoiceSettings, saveVoiceSettings, speak, speechSupported, onVoices, englishVoices, defaultVoice,
+} from '../lib/speech.js';
+
+const accentLabel = (lang) => {
+  const l = lang.replace('_', '-');
+  if (l.startsWith('en-US')) return '美音';
+  if (l.startsWith('en-GB')) return '英音';
+  if (l.startsWith('en-AU')) return '澳洲';
+  if (l.startsWith('en-IN')) return '印度';
+  if (l.startsWith('en-IE')) return '爱尔兰';
+  if (l.startsWith('en-ZA')) return '南非';
+  return l;
+};
 
 export default function VoiceSettings() {
   const [s, setS] = useState(getVoiceSettings());
+  const [voices, setVoices] = useState([]);
+
+  useEffect(() => onVoices((list) => setVoices(englishVoices(list))), []);
+
   const update = (patch) => {
     const next = { ...s, ...patch };
     setS(next);
     saveVoiceSettings(next);
   };
+
   if (!speechSupported) return <p className="text-sm text-muted">这个浏览器不支持朗读</p>;
+
+  const fallback = defaultVoice();
+  const current = voices.find((v) => v.name === s.voiceName) ? s.voiceName : fallback?.name || '';
+
   return (
     <div className="space-y-3">
       <div>
-        <div className="text-sm font-medium mb-1.5">发音</div>
-        <div className="grid grid-cols-2 gap-1 bg-paper rounded-lg p-1">
-          {[['en-US', '美音'], ['en-GB', '英音']].map(([v, l]) => (
-            <button
-              key={v}
-              onClick={() => update({ accent: v })}
-              className={`py-1.5 rounded-md text-sm ${s.accent === v ? 'bg-card shadow-sm font-medium' : 'text-muted'}`}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
+        <div className="text-sm font-medium mb-1.5">声音</div>
+        {voices.length === 0 ? (
+          <p className="text-xs text-muted">正在读取电脑上的声音…</p>
+        ) : (
+          <select
+            className="input !py-2 text-sm"
+            value={current}
+            onChange={(e) => {
+              update({ voiceName: e.target.value });
+              speak('Every word you look up leaves a mark on the trail.', { voiceName: e.target.value });
+            }}
+          >
+            {voices.map((v) => (
+              <option key={v.name} value={v.name}>
+                {v.name}（{accentLabel(v.lang)}）
+              </option>
+            ))}
+          </select>
+        )}
+        <p className="text-xs text-muted mt-1">声音来自你电脑系统，可在 系统设置 → 辅助功能 → 朗读内容 里下载更多高品质声音。</p>
       </div>
       <div>
         <div className="text-sm font-medium mb-1.5 flex justify-between">
@@ -36,7 +66,7 @@ export default function VoiceSettings() {
           className="w-full accent-trail"
         />
       </div>
-      <button className="btn btn-soft w-full" onClick={() => speak('This is how I sound.', s)}>🔊 试听</button>
+      <button className="btn btn-soft w-full" onClick={() => speak('Every word you look up leaves a mark on the trail.', s)}>🔊 试听</button>
     </div>
   );
 }
