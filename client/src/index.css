@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f6f3ec;
+  --color-card: #fffdf8;
+  --color-ink: #1d2320;
+  --color-muted: #6b716c;
+  --color-line: #e4ded1;
+  --color-trail: #1f4d3a;
+  --color-trail-soft: #e3ece6;
+  --color-amber: #e9b949;
+  --color-amber-soft: #fbf0d0;
+  --font-read: "Charter", "Iowan Old Style", "Source Serif Pro", Georgia, "Noto Serif SC", serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+html, body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 阅读区单词：可点 */
+.w {
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color .12s;
+}
+@media (hover: hover) {
+  .w:hover { background: var(--color-amber-soft); }
+}
+.w.saved {
+  background: linear-gradient(transparent 62%, #f5dc94 62%);
+}
+.w.active { background: var(--color-amber); }
+
+.tr-hidden {
+  filter: blur(5px);
+  user-select: none;
+  cursor: pointer;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .375rem;
+  border-radius: .625rem; padding: .5rem .9rem; font-size: .875rem; font-weight: 500;
+  transition: background-color .15s, opacity .15s;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary { background: var(--color-trail); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #173b2c; }
+.btn-ghost { background: transparent; color: var(--color-ink); }
+.btn-ghost:hover:not(:disabled) { background: #ebe6da; }
+.btn-soft { background: var(--color-trail-soft); color: var(--color-trail); }
+.btn-soft:hover:not(:disabled) { background: #d4e3d9; }
+
+.input {
+  width: 100%; border: 1px solid var(--color-line); background: #fff; border-radius: .625rem;
+  padding: .6rem .8rem; font-size: 1rem; outline: none;
+}
+.input:focus { border-color: var(--color-trail); box-shadow: 0 0 0 3px #1f4d3a22; }
+
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+/* 句子后面的小按钮：电脑上鼠标移过去才出现，手机上一直显示 */
+@media (hover: hover) {
+  [data-sid] { position: relative; }
+  .sent-actions {
+    opacity: 0; transition: opacity .15s;
+    position: absolute; right: 0; top: .15rem; transform: translateX(calc(100% + .25rem));
+  }
+  [data-sid]:hover .sent-actions { opacity: 1; }
+}
